@@ -17,15 +17,18 @@ namespace cpsc571.Controllers
         // GET: Home
         [HttpGet]
         public ActionResult Index() {
-            TweetinviConfig.CurrentThreadSettings.TweetMode = TweetMode.Extended;
-            Auth.SetUserCredentials(_consumerKey, _consumerSecret, _accessToken, _accessTokenSecret);
-            var tweets = Search.SearchTweets("dog");
-            foreach (Tweetinvi.Models.ITweet tweet in tweets)
-            {
-                Console.WriteLine(tweet.FullText);
-            }
-            List<Tweetinvi.Models.ITweet> model = new List<Tweetinvi.Models.ITweet>(tweets);
-            return View(model);
+            //TweetinviConfig.CurrentThreadSettings.TweetMode = TweetMode.Extended;
+            //Auth.SetUserCredentials(_consumerKey, _consumerSecret, _accessToken, _accessTokenSecret);
+            //var tweets = Search.SearchTweets("dog");
+            //foreach (Tweetinvi.Models.ITweet tweet in tweets)
+            //{
+            //    Console.WriteLine(tweet.FullText);
+            //}
+            //List<Tweetinvi.Models.ITweet> model = new List<Tweetinvi.Models.ITweet>(tweets);
+            //return View(model);
+            Helpers.TweetParser tp = new Helpers.TweetParser();
+            tp.run();
+            return null;
 
         }
     }
