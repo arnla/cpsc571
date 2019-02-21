@@ -1,7 +1,13 @@
-﻿
+﻿@model List<TweetSharp.TwitterStatus>
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "CPSC571";
 }
 
-<h2>Index</h2>
-
+<div>
+    <ul id="tweetsList">
+        @foreach (var t in Model.ToList())
+        {
+            <li>@t.Text</li>
+        }
+    </ul>
+</div>
