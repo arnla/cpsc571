@@ -1,4 +1,4 @@
-﻿@model List<TweetSharp.TwitterStatus>
+﻿@model List<Tweetinvi.Models.ITweet>
 @{
     ViewBag.Title = "CPSC571";
 }
@@ -7,7 +7,15 @@
     <ul id="tweetsList">
         @foreach (var t in Model.ToList())
         {
-            <li>@t.Text</li>
+            <li>@t.FullText</li>
         }
     </ul>
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        setInterval(function () {
+            $('#tweetsList').append('<li>HELLO</li>');
+        }, 5000);
+    });
+</script>

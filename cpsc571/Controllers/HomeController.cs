@@ -9,13 +9,12 @@ namespace cpsc571.Controllers
 {
     public class HomeController : Controller
     {
-        private static string _consumerKey = "";
-        private static string _consumerSecret = "";
-        private static string _accessToken = "";
-        private static string _accessTokenSecret = "";
+        private static string _consumerKey = ;
+        private static string _consumerSecret = ;
+        private static string _accessToken = ;
+        private static string _accessTokenSecret = ;
 
         // GET: Home
-        [HttpGet]
         public ActionResult Index() {
             TweetinviConfig.CurrentThreadSettings.TweetMode = TweetMode.Extended;
             Auth.SetUserCredentials(_consumerKey, _consumerSecret, _accessToken, _accessTokenSecret);
