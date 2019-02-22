@@ -17,23 +17,11 @@ namespace cpsc571.Controllers
         // GET: Home
         public ActionResult Index()
         {
-            //stream = new TwitterStream();
-            //ThreadStart job = new ThreadStart(stream.StartStream);
-            //Thread thread = new Thread(job);
-            //thread.Start();
-            var stream = Stream.CreateFilteredStream();
-            stream.AddTrack("dog");
-
-
-            stream.MatchingTweetReceived += (sender, args) =>
-            {
-                var tweet = args.Tweet;
-                var matchingTracks = args.MatchingTracks;
-                var matchedOn = args.MatchOn;
-                Debug.WriteLine(args.Tweet);
-            };
-
-            stream.StartStreamMatchingAllConditionsAsync();
+            stream = new TwitterStream();
+            stream.SetupStream();
+            ThreadStart job = new ThreadStart(stream.StartStream);
+            Thread thread = new Thread(job);
+            thread.Start();
 
             return View();
         }
@@ -41,6 +29,11 @@ namespace cpsc571.Controllers
         public JsonResult GetTweets()
         {
             return Json(stream.GetListTweets());
+        }
+
+        public void Stop()
+        {
+            stream.StopStream();
         }
     }
 }
