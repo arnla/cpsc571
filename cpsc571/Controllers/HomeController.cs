@@ -14,6 +14,23 @@ namespace cpsc571.Controllers
         private static string _accessToken = "";
         private static string _accessTokenSecret = "";
         private Helpers.TweetParser tweetParser;
+        private Dictionary<string, int> tweetCount;
+
+
+        private void CountTweetWords(List<String> words)
+        {
+            foreach(string word in words)
+            {
+                try
+                {
+                    tweetCount[word]++;
+                }
+                catch(KeyNotFoundException)
+                {
+                    tweetCount[word] = 1;
+                }
+            }
+        }
 
         // GET: Home
         [HttpGet]
@@ -26,6 +43,8 @@ namespace cpsc571.Controllers
             {
                 Console.WriteLine(tweet.FullText);
                 List<String> words = tweetParser.ParseTweet(tweet.FullText);
+                CountTweetWords(words);
+
             }
             List<Tweetinvi.Models.ITweet> model = new List<Tweetinvi.Models.ITweet>(tweets);
             return View(model);

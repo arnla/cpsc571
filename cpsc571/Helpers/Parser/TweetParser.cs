@@ -22,7 +22,6 @@ namespace cpsc571.Helpers
         private String TAG_DICT_PATH = Path.Combine(HttpRuntime.BinDirectory, @"Helpers\Parser\Models\Parser\tagdict");
         private String[] ALLOWED_TAGS = { "JJ", "JJR", "JJS", "MD", "NN", "NNS", "NNP", "NNPS" };
 
-
         public List<String> ParseTweet(String tweetText)
         {
             List<String> result = new List<string>();
