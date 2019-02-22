@@ -2,45 +2,46 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using System.Web.Mvc;
 using System.Threading;
 using System.Diagnostics;
 using Tweetinvi;
-using cpsc571.Helpers;
 
-namespace cpsc571.Controllers
+namespace cpsc571.Helpers
 {
-    public class HomeController : Controller
+    public class TwitterStream
     {
-        private TwitterStream stream;
 
-        // GET: Home
-        public ActionResult Index()
+        private bool _stopThread = false;
+        public List<Tweetinvi.Models.ITweet> tweetsList = new List<Tweetinvi.Models.ITweet>();
+
+        public void StartStream()
         {
-            //stream = new TwitterStream();
-            //ThreadStart job = new ThreadStart(stream.StartStream);
-            //Thread thread = new Thread(job);
-            //thread.Start();
             var stream = Stream.CreateFilteredStream();
             stream.AddTrack("dog");
 
-
+    
             stream.MatchingTweetReceived += (sender, args) =>
             {
+                tweetsList.Add(args.Tweet);
                 var tweet = args.Tweet;
                 var matchingTracks = args.MatchingTracks;
                 var matchedOn = args.MatchOn;
                 Debug.WriteLine(args.Tweet);
             };
-
+            
             stream.StartStreamMatchingAllConditionsAsync();
-
-            return View();
         }
 
-        public JsonResult GetTweets()
+        public void StopStream()
         {
-            return Json(stream.GetListTweets());
+            _stopThread = true;
+        }
+
+        public List<Tweetinvi.Models.ITweet> GetListTweets()
+        {
+            List<Tweetinvi.Models.ITweet> returnTweets = new List<Tweetinvi.Models.ITweet>(tweetsList);
+            tweetsList.Clear();
+            return returnTweets;
         }
     }
 }
