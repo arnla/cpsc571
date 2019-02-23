@@ -389,6 +389,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\TwitterStream.cs" />
     <Compile Include="Helpers\Parser\TweetParser.cs" />
     <Compile Include="Migrations\201902231513573_init.cs" />
     <Compile Include="Migrations\201902231513573_init.Designer.cs">

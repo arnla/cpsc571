@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Threading;
+using System.Diagnostics;
 using Tweetinvi;
-using Tweetinvi.Parameters;
+using cpsc571.Helpers;
+
 namespace cpsc571.Controllers
 {
     public class HomeController : Controller
     {
-        private static string _consumerKey = "";
-        private static string _consumerSecret = "";
-        private static string _accessToken = "";
-        private static string _accessTokenSecret = "";
         private Helpers.TweetParser tweetParser;
         private Dictionary<string, int> tweetCount;
+        private TwitterStream stream;
 
 
         private void CountTweetWords(List<String> words)
@@ -33,23 +33,25 @@ namespace cpsc571.Controllers
         }
 
         // GET: Home
-        [HttpGet]
-        public ActionResult Index() {
-            tweetParser = new Helpers.TweetParser();
-            TweetinviConfig.CurrentThreadSettings.TweetMode = TweetMode.Extended;
-            Auth.SetUserCredentials(_consumerKey, _consumerSecret, _accessToken, _accessTokenSecret);
-            var tweets = Search.SearchTweets("dog");
-            foreach (Tweetinvi.Models.ITweet tweet in tweets)
-            {
-                Console.WriteLine(tweet.FullText);
-                List<String> words = tweetParser.ParseTweet(tweet.FullText);
-                CountTweetWords(words);
+        public ActionResult Index()
+        {
+            stream = new TwitterStream();
+            stream.SetupStream();
+            ThreadStart job = new ThreadStart(stream.StartStream);
+            Thread thread = new Thread(job);
+            thread.Start();
 
-            }
-            List<Tweetinvi.Models.ITweet> model = new List<Tweetinvi.Models.ITweet>(tweets);
-            return View(model);
-            
+            return View();
+        }
 
+        public JsonResult GetTweets()
+        {
+            return Json(stream.GetListTweets());
+        }
+
+        public void Stop()
+        {
+            stream.StopStream();
         }
     }
 }
