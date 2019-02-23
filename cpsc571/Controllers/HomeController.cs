@@ -7,6 +7,8 @@ using System.Threading;
 using System.Diagnostics;
 using Tweetinvi;
 using cpsc571.Helpers;
+using cpsc571.DAL;
+using cpsc571.Models;
 
 namespace cpsc571.Controllers
 {
@@ -15,7 +17,7 @@ namespace cpsc571.Controllers
         private Helpers.TweetParser tweetParser;
         private Dictionary<string, int> tweetCount;
         private TwitterStream stream;
-
+        private TwitterDbContext _db = new TwitterDbContext();
 
         private void CountTweetWords(List<String> words)
         {
@@ -41,7 +43,14 @@ namespace cpsc571.Controllers
             Thread thread = new Thread(job);
             thread.Start();
 
-            return View();
+            List<Models.Tweet> model = new List<Models.Tweet>();
+            var query = from t in _db.Tweets select t;
+            foreach (Models.Tweet t in query.ToList())
+            {
+                model.Add(t);
+            }
+
+            return View(model);
         }
 
         public JsonResult GetTweets()

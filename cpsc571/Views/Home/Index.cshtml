@@ -1,4 +1,4 @@
-﻿@model List<Tweetinvi.Models.ITweet>
+﻿@model List<cpsc571.Models.Tweet>
 @{
     ViewBag.Title = "CPSC571";
 }
@@ -6,18 +6,18 @@
 <div>
     <button id="stopStream">Stop application</button>
     <ul id="tweetsList">
-        @*@foreach (var t in Model.ToList())
+        @foreach (var t in Model.ToList())
         {
             <li>@t.FullText</li>
-        }*@
+        }
     </ul>
 </div>
 
 <script type="text/javascript">
     $(document).ready(function () {
-        setInterval(function () {
-            $('#tweetsList').append('<li>HELLO</li>');
-        }, 5000);
+        //setinterval(function () {
+        //    $('#tweetslist').append('<li>hello</li>');
+        //}, 5000);
 
         $('#stopStream').click(function () {
             location.href = '@Url.Action("Stop", "Home")';

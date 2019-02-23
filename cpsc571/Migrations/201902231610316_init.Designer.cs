@@ -13,7 +13,7 @@ namespace cpsc571.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201902231513573_init"; }
+            get { return "201902231610316_init"; }
         }
         
         string IMigrationMetadata.Source
