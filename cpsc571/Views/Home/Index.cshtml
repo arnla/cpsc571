@@ -4,10 +4,23 @@
 }
 
 <div>
+    <button id="stopStream">Stop application</button>
     <ul id="tweetsList">
-        @foreach (var t in Model.ToList())
+        @*@foreach (var t in Model.ToList())
         {
             <li>@t.FullText</li>
-        }
+        }*@
     </ul>
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        setInterval(function () {
+            $('#tweetsList').append('<li>HELLO</li>');
+        }, 5000);
+
+        $('#stopStream').click(function () {
+            location.href = '@Url.Action("Stop", "Home")';
+        });
+    });
+</script>
