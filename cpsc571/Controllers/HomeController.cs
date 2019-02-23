@@ -12,10 +12,6 @@ namespace cpsc571.Controllers
 {
     public class HomeController : Controller
     {
-        private static string _consumerKey = "";
-        private static string _consumerSecret = "";
-        private static string _accessToken = "";
-        private static string _accessTokenSecret = "";
         private Helpers.TweetParser tweetParser;
         private Dictionary<string, int> tweetCount;
         private TwitterStream stream;

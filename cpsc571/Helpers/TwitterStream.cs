@@ -10,7 +10,10 @@ namespace cpsc571.Helpers
 {
     public class TwitterStream
     {
-
+        private static string _consumerKey = "";
+        private static string _consumerSecret = "";
+        private static string _accessToken = "";
+        private static string _accessTokenSecret = "";
         public List<Tweetinvi.Models.ITweet> tweetsList = new List<Tweetinvi.Models.ITweet>();
         private Tweetinvi.Streaming.IFilteredStream stream;
 
