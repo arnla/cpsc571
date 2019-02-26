@@ -18,9 +18,11 @@ namespace cpsc571.Helpers
         private static string _accessTokenSecret = "";
         private static List<Tweetinvi.Models.ITweet> tweetsList = new List<Tweetinvi.Models.ITweet>();
         private static Tweetinvi.Streaming.IFilteredStream stream;
+        private static Helpers.TweetParser tweetParser;
 
         public void SetupStream()
         {
+            tweetParser = new TweetParser();
             TweetinviConfig.CurrentThreadSettings.TweetMode = TweetMode.Extended;
             Auth.SetUserCredentials(_consumerKey, _consumerSecret, _accessToken, _accessTokenSecret);
             stream = Stream.CreateFilteredStream();
@@ -59,15 +61,39 @@ namespace cpsc571.Helpers
             foreach(Tweetinvi.Models.ITweet t in listToDb)
             {
                 Models.Tweet tweet = new Models.Tweet();
+                String textToParse;
                 if(t.IsRetweet)
                 {
-                    tweet.FullText = t.RetweetedTweet.FullText;
+                    textToParse = t.RetweetedTweet.FullText;
                 } else
                 {
-                    tweet.FullText = t.FullText;
+                    textToParse = t.FullText;
                 }
-                _db.Tweets.Add(tweet);
-                _db.SaveChanges();
+                CountTweetWords(textToParse);
+            }
+        }
+
+        private static void CountTweetWords(string tweetText)
+        {
+            List<String> tweetWords = tweetParser.ParseTweet(tweetText);
+            foreach (String word in tweetWords)
+            {
+                using (var context = new TwitterDbContext())
+                {
+                    Models.Tweet dbTweet = context.Tweets.SingleOrDefault(t => t.Keyword == word);
+                    if(dbTweet == null)
+                    {
+                        dbTweet = new Models.Tweet();
+                        dbTweet.Keyword = word;
+                        dbTweet.Count = 1;
+                        context.Tweets.Add(dbTweet);
+                    } else
+                    {
+                        dbTweet.Count += 1;
+                    }
+                    context.SaveChanges();
+                }
+                
             }
         }
 

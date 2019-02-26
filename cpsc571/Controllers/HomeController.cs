@@ -44,11 +44,11 @@ namespace cpsc571.Controllers
             thread.Start();
 
             List<Models.Tweet> model = new List<Models.Tweet>();
-            var query = from t in _db.Tweets select t;
-            foreach (Models.Tweet t in query.ToList())
-            {
-                model.Add(t);
-            }
+            //var query = from t in _db.Tweets select t;
+            //foreach (Models.Tweet t in query.ToList())
+            //{
+            //    model.Add(t);
+            //}
 
             return View(model);
         }

@@ -8,8 +8,10 @@ namespace cpsc571.Models
 {
     public class Tweet
     {
+        
         [Key]
-        public int Id { get; set; }
-        public String FullText { get; set; }
+        public String Keyword { get; set; }
+
+        public int Count { get; set; }
     }
 }
