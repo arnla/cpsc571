@@ -3,6 +3,16 @@
     ViewBag.Title = "CPSC571";
 }
 
+<form id="queryForm" onsubmit="return submitQuery()" action='@Url.Action("Tester", "Home")' method="post">
+    <div class="form-group">
+        <label for="inputQuery">Input Query</label>
+        @*<input type="text" class="form-control form-control-lg" id="inputQuery" aria-describedby="queryHelp" placeholder="Enter Query">*@
+        @Html.TextBox("InputQuery")
+        <small id="queryHelp" class="form-text text-muted">Enter a word or query you wish to find words related to.</small>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
 <div>
     <button id="stopStream">Stop application</button>
     <ul id="tweetsList">
@@ -14,6 +24,15 @@
 </div>
 
 <script type="text/javascript">
+
+    function submitQuery() {
+        var query = document.forms["queryForm"]["inputQuery"].value;
+        if (query == "") {
+            alert("Query must not be empty!");
+            return false;
+        }
+    }
+
     $(document).ready(function () {
         //setinterval(function () {
         //    $('#tweetslist').append('<li>hello</li>');
@@ -23,4 +42,6 @@
             location.href = '@Url.Action("Stop", "Home")';
         });
     });
+
+
 </script>
