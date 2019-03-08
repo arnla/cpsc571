@@ -37,11 +37,7 @@ namespace cpsc571.Controllers
         // GET: Home
         public ActionResult Index()
         {
-            stream = new TwitterStream();
-            stream.SetupStream();
-            ThreadStart job = new ThreadStart(stream.StartStream);
-            Thread thread = new Thread(job);
-            thread.Start();
+            
 
             List<Models.Tweet> model = new List<Models.Tweet>();
             //var query = from t in _db.Tweets select t;
@@ -61,6 +57,15 @@ namespace cpsc571.Controllers
         public void Stop()
         {
             stream.StopStream();
+        }
+
+        public void Tester(FormCollection form)
+        {
+            stream = new TwitterStream(form.Get("InputQuery"));
+            stream.SetupStream();
+            ThreadStart job = new ThreadStart(stream.StartStream);
+            Thread thread = new Thread(job);
+            thread.Start();
         }
     }
 }

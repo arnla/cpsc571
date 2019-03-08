@@ -19,6 +19,12 @@ namespace cpsc571.Helpers
         private static List<Tweetinvi.Models.ITweet> tweetsList = new List<Tweetinvi.Models.ITweet>();
         private static Tweetinvi.Streaming.IFilteredStream stream;
         private static Helpers.TweetParser tweetParser;
+        private string query;
+
+        public TwitterStream(String query)
+        {
+            this.query = query;
+        }
 
         public void SetupStream()
         {
@@ -26,7 +32,7 @@ namespace cpsc571.Helpers
             TweetinviConfig.CurrentThreadSettings.TweetMode = TweetMode.Extended;
             Auth.SetUserCredentials(_consumerKey, _consumerSecret, _accessToken, _accessTokenSecret);
             stream = Stream.CreateFilteredStream();
-            stream.AddTrack("dog");
+            stream.AddTrack(query);
 
             stream.MatchingTweetReceived += (sender, args) =>
             {
