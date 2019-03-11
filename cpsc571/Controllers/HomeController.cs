@@ -7,7 +7,6 @@ using System.Threading;
 using System.Diagnostics;
 using Tweetinvi;
 using cpsc571.Helpers;
-using cpsc571.DAL;
 using cpsc571.Models;
 
 namespace cpsc571.Controllers
@@ -17,7 +16,6 @@ namespace cpsc571.Controllers
         private Helpers.TweetParser tweetParser;
         private Dictionary<string, int> tweetCount;
         private TwitterStream stream;
-        private TwitterDbContext _db = new TwitterDbContext();
 
         private void CountTweetWords(List<String> words)
         {
