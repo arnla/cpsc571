@@ -13,6 +13,12 @@
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 
+<div id="chart">
+    <svg>
+        
+    </svg>
+</div>
+
 <div>
     <button id="stopStream">Stop application</button>
     <ul id="tweetsList">
@@ -24,6 +30,36 @@
 </div>
 
 <script type="text/javascript">
+
+    var csvPath = "@Request.Url.Scheme" + "://" + "@Request.Url.Authority" + 
+    "@Request.ApplicationPath.TrimEnd('/')" + "/" + "Data_Files/test.csv";
+   
+
+    var chart = bubbleChart().width(600).height(400);
+    d3.csv(csvPath, function (error, data) {
+        if (error) {
+            console.error('Error getting or parsing the data.');
+            throw error;
+        }
+        // selection.datum() returns the bound datum for the first element in the selection and 
+        //  doesn't join the specified array of data with the selected elements
+        var chart = bubbleChart().width(600).height(400);
+        d3.select('#chart').datum(data).call(chart);
+    });
+
+    //var data = [80, 120, 60, 150, 200];
+    //var barHeight = 20;
+    //var bar = d3.select('svg')
+    //          .selectAll('rect')
+    //          .data(data)
+    //          .enter()
+    //          .append('rect')
+    //          .attr('width', function(d) {  return d; })
+    //          .attr('height', barHeight - 1)
+    //          .attr('transform', function(d, i) {
+    //            return "translate(0," + i * barHeight + ")";
+    //          });
+
 
     function submitQuery() {
         var query = document.forms["queryForm"]["inputQuery"].value;
