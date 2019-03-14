@@ -66,7 +66,6 @@ namespace cpsc571.Helpers
 
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            stream.PauseStream();
             List<Tweetinvi.Models.ITweet> listToDb = new List<Tweetinvi.Models.ITweet>(tweetsList);
             tweetsList.Clear();
             foreach(Tweetinvi.Models.ITweet t in listToDb)
@@ -82,7 +81,6 @@ namespace cpsc571.Helpers
                 }
                 CountTweetWords(textToParse);
             }
-            stream.ResumeStream();
         }
 
         private void CountTweetWords(string tweetText)
@@ -112,8 +110,8 @@ namespace cpsc571.Helpers
                     Models.Tweet newTweet = new Models.Tweet();
                     newTweet.Keyword = word;
                     newTweet.Count = 1;
-                    newTweet.Id = ctr;
                     collection.InsertOne(newTweet);
+                    ctr++;
                 }
                 else
                 {
@@ -121,7 +119,6 @@ namespace cpsc571.Helpers
                     var update = Builders<Models.Tweet>.Update.Inc(t => t.Count, 1);
                     collection.FindOneAndUpdate(filter, update);
                 }
-                ctr++;
             }
         }
 
