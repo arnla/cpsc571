@@ -32,7 +32,9 @@
 <script type="text/javascript">
 
     var jsonPath = "@Request.Url.Scheme" + "://" + "@Request.Url.Authority" + 
-    "@Request.ApplicationPath.TrimEnd('/')" + "/" + "Data_Files/test.json";
+        "@Request.ApplicationPath.TrimEnd('/')" + "/" + "Data_Files/test.json";
+
+    var threshold = 2000; // Set threshold for values here
    
 
     var diameter = 960,
@@ -80,7 +82,8 @@
     function classes(root) {
         var dataset = [];
         for (var node in root) {
-            dataset.push({keyword: root[node].Keyword, count: root[node].Count})
+            if(root[node].Count > threshold)
+                dataset.push({keyword: root[node].Keyword, count: root[node].Count})
         }
         return { children: dataset }
     }
