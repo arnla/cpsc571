@@ -1,9 +1,8 @@
-﻿@model List<cpsc571.Models.Tweet>
-@{
+﻿@{
     ViewBag.Title = "CPSC571";
 }
 
-<form id="queryForm" onsubmit="return submitQuery()" action='@Url.Action("Tester", "Home")' method="post">
+<form id="queryForm">
     <div class="form-group">
         <label for="inputQuery">Input Query</label>
         @*<input type="text" class="form-control form-control-lg" id="inputQuery" aria-describedby="queryHelp" placeholder="Enter Query">*@
@@ -31,55 +30,25 @@
 
 <script type="text/javascript">
 
-    var jsonPath = "@Request.Url.Scheme" + "://" + "@Request.Url.Authority" + 
-    "@Request.ApplicationPath.TrimEnd('/')" + "/" + "Data_Files/test.json";
-   
+    let jsonPath = "@Request.Url.Scheme" + "://" + "@Request.Url.Authority" + 
+    "@Request.ApplicationPath.TrimEnd('/')" + "/" + "Data_Files/tweets.json";
 
-    var diameter = 960,
+    let diameter = 960,
         format = d3.format(",d"),
         color = d3.scaleOrdinal(d3.schemeCategory20c);
 
-    var bubble = d3.pack()
+    let bubble = d3.pack()
         .size([diameter, diameter])
         .padding(1.5);
 
-    var svg = d3.select("body").append("svg")
+    let svg = d3.select("body").append("svg")
         .attr("width", diameter)
         .attr("height", diameter)
         .attr("class", "bubble");
 
-    d3.json(jsonPath, function (error, data) {
-        if (error) throw error;
-
-        var root = d3.hierarchy(classes(data))
-            .sum(function (d) { return d.count; })
-            .sort(function (a, b) { return b.count - a.count; });
-
-        bubble(root);
-        var node = svg.selectAll(".node")
-            .data(root.children)
-            .enter().append("g")
-            .attr("class", "node")
-            .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
-
-        node.append("title")
-            .text(function (d) { return d.data.keyword + ": " + format(d.data.count); });
-
-        node.append("circle")
-            .attr("r", function (d) { return d.r; })
-            .style("fill", function (d) {
-                return color(d.data.keyword);
-            });
-
-        node.append("text")
-            .attr("dy", ".3em")
-            .style("text-anchor", "middle")
-            .text(function (d) { return d.data.keyword; });
-    });
-
     function classes(root) {
-        var dataset = [];
-        for (var node in root) {
+        let dataset = [];
+        for (let node in root) {
             dataset.push({keyword: root[node].Keyword, count: root[node].Count})
         }
         return { children: dataset }
@@ -101,18 +70,73 @@
     //          });
 
 
-    function submitQuery() {
-        var query = document.forms["queryForm"]["inputQuery"].value;
-        if (query == "") {
-            alert("Query must not be empty!");
-            return false;
-        }
-    }
-
     $(document).ready(function () {
-        //setinterval(function () {
-        //    $('#tweetslist').append('<li>hello</li>');
-        //}, 5000);
+        $('#queryForm').submit(function (e) {
+            e.preventDefault();
+            if ($('#InputQuery').val() === '') {
+                alert("Query must not be empty!");
+                return false;
+            }
+
+            $.ajax({
+                url: '@Url.Action("SubmitForm")',
+                type: 'POST',
+                data: $('#queryForm').serialize(),
+                success: function () {
+                    setInterval(function () {
+                        updateTweetsJson()
+                    }, 10000)
+                },
+                error: function () {
+                    alert('error');
+                }
+            });
+        });
+
+        function updateGraph() {
+            svg.selectAll("*").remove();
+            d3.json(jsonPath, function (error, data) {
+                if (error) throw error;
+
+                let root = d3.hierarchy(classes(data))
+                    .sum(function (d) { return d.count; })
+                    .sort(function (a, b) { return b.count - a.count; });
+
+                bubble(root);
+                let node = svg.selectAll(".node")
+                    .data(root.children)
+                    .enter().append("g")
+                    .attr("class", "node")
+                    .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+                node.append("title")
+                    .text(function (d) { return d.data.keyword + ": " + format(d.data.count); });
+
+                node.append("circle")
+                    .attr("r", function (d) { return d.r; })
+                    .style("fill", function (d) {
+                        return color(d.data.keyword);
+                    });
+
+                node.append("text")
+                    .attr("dy", ".3em")
+                    .style("text-anchor", "middle")
+                    .text(function (d) { return d.data.keyword; });
+            });
+        }
+
+        function updateTweetsJson() {
+            $.ajax({
+                url: '@Url.Action("GetTweets")',
+                type: 'POST',
+                success: function () {
+                    updateGraph();
+                },
+                error: function () {
+                    alert('error updating tweets json');
+                }
+            });
+        }
 
         $('#stopStream').click(function () {
             location.href = '@Url.Action("Stop", "Home")';
