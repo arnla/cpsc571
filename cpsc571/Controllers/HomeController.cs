@@ -9,6 +9,7 @@ using Tweetinvi;
 using cpsc571.Helpers;
 using cpsc571.Models;
 using MongoDB.Driver;
+using System.Web.Script.Serialization;
 
 namespace cpsc571.Controllers
 {
@@ -20,12 +21,14 @@ namespace cpsc571.Controllers
             return View();
         }
 
-        public List<Models.Tweet> GetTweets()
+        public void GetTweets()
         {
             MongoClient mongoClient = new MongoClient("mongodb://localhost");
             IMongoDatabase _db = mongoClient.GetDatabase("cpsc571");
             IMongoCollection<Models.Tweet> collection = _db.GetCollection<Models.Tweet>("tweets");
-            return collection.Find(_ => true).ToList();
+            string jsonTweets = new JavaScriptSerializer().Serialize(collection.Find(_ => true).ToList());
+            string path = Server.MapPath("~/Data_Files/");
+            System.IO.File.WriteAllText(path + "tweets.json", jsonTweets);
         }
 
         //public void Stop()
@@ -34,15 +37,13 @@ namespace cpsc571.Controllers
         //}
 
         [HttpPost]
-        public JsonResult Tester(FormCollection form)
+        public void SubmitForm(FormCollection form)
         {
             TwitterStream stream = new TwitterStream(form.Get("InputQuery"));
             stream.SetupStream();
             ThreadStart job = new ThreadStart(stream.StartStream);
             Thread thread = new Thread(job);
             thread.Start();
-            Thread.Sleep(6500);
-            return Json(GetTweets());
         }
     }
 }
