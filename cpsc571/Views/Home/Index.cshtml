@@ -1,9 +1,8 @@
-﻿@model List<cpsc571.Models.Tweet>
-@{
+﻿@{
     ViewBag.Title = "CPSC571";
 }
 
-<form id="queryForm" onsubmit="return submitQuery()" action='@Url.Action("Tester", "Home")' method="post">
+<form id="queryForm">
     <div class="form-group">
         <label for="inputQuery">Input Query</label>
         @*<input type="text" class="form-control form-control-lg" id="inputQuery" aria-describedby="queryHelp" placeholder="Enter Query">*@
@@ -101,15 +100,30 @@
     //          });
 
 
-    function submitQuery() {
-        var query = document.forms["queryForm"]["inputQuery"].value;
-        if (query == "") {
-            alert("Query must not be empty!");
-            return false;
-        }
-    }
-
     $(document).ready(function () {
+        $('#queryForm').submit(function (e) {
+            e.preventDefault();
+            if ($('#InputQuery').val() === '') {
+                alert("Query must not be empty!");
+                return false;
+            }
+
+            $.ajax({
+                url: '@Url.Action("Tester")',
+                type: 'POST',
+                data: $('#queryForm').serialize(),
+                dataType: 'json',
+                success: function (tweets) {
+                    $.each(tweets, function (i, tweet) {
+                        $('#tweetsList').append('<li>' + tweet.Keyword + ' - ' + tweet.Count + '</li>');
+                    });
+                },
+                error: function () {
+                    alert('error');
+                }
+            });
+        });
+
         //setinterval(function () {
         //    $('#tweetslist').append('<li>hello</li>');
         //}, 5000);

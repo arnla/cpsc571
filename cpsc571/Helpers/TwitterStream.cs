@@ -122,13 +122,6 @@ namespace cpsc571.Helpers
             }
         }
 
-        public List<Tweetinvi.Models.ITweet> GetListTweets()
-        {
-            List<Tweetinvi.Models.ITweet> returnTweets = new List<Tweetinvi.Models.ITweet>(tweetsList);
-            tweetsList.Clear();
-            return returnTweets;
-        }
-
         private void SetupDb()
         {
             //mongoClient = new MongoClient("mongodb+srv://user:test@school-hjytx.mongodb.net/test?retryWrites=true");
