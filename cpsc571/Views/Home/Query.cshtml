@@ -1,0 +1,204 @@
+﻿@{ 
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>CPSC571</title>
+
+    <!-- Custom fonts for this template-->
+    <link href="~/AdminDash/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+    <!-- Custom styles for this template-->
+    <link href="~/AdminDash/css/sb-admin-2.min.css" rel="stylesheet">
+
+    <script src="//d3js.org/d3.v4.js"></script>
+    <script src="~/Scripts/bubble.js"></script>
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+
+</head>
+
+<body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column" style="background-color: transparent;">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    <!-- Topbar Search -->
+                    <form id="queryForm" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                        <div class="input-group">
+                            <input id="InputQuery" type="text" class="form-control bg-light border-0 small" placeholder="Enter a word or query you wish to find words related to..." aria-label="Search" aria-describedby="basic-addon2">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-search fa-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </nav>
+                <!-- End of Topbar -->
+                <!-- Begin Page Content -->
+                <div class="container-fluid" style="text-align: center;">
+                    <div id="chart">
+                    </div>
+                </div>
+
+            </div>
+            <!-- End of Main Content -->
+            <!-- Footer -->
+            <!-- <footer class="sticky-footer bg-white">
+              <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                  <span>Copyright &copy; Your Website 2019</span>
+                </div>
+              </div>
+            </footer> -->
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="~/AdminDash/vendor/jquery/jquery.min.js"></script>
+    <script src="~/AdminDash/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="~/AdminDash/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="~/AdminDash/js/sb-admin-2.min.js"></script>
+
+    <script type="text/javascript">
+
+        let jsonPath = "@Request.Url.Scheme" + "://" + "@Request.Url.Authority" +
+        "@Request.ApplicationPath.TrimEnd('/')" + "/" + "Data_Files/tweets.json";
+
+        let diameter = 960,
+            format = d3.format(",d"),
+            color = d3.scaleOrdinal(d3.schemeCategory20c);
+
+        let bubble = d3.pack()
+            .size([diameter, diameter])
+            .padding(1.5);
+
+        let svg = d3.select("#chart").append("svg")
+            .attr("width", diameter)
+            .attr("height", diameter)
+            .attr("class", "bubble");
+
+        function classes(root) {
+            let dataset = [];
+            for (let node in root) {
+                dataset.push({keyword: root[node].Keyword, count: root[node].Count})
+            }
+            return { children: dataset }
+        }
+
+        d3.select(self.frameElement).style("height", diameter + "px");
+
+        $(document).ready(function () {
+            $('#queryForm').submit(function (e) {
+                e.preventDefault();
+                if ($('#InputQuery').val() === '') {
+                    alert("Query must not be empty!");
+                    return false;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SubmitForm")',
+                    type: 'POST',
+                    data: { query: $('#InputQuery').val() },
+                    success: function () {
+                        setInterval(function () {
+                            updateTweetsJson()
+                        }, 10000)
+                    },
+                    error: function () {
+                        alert('error');
+                    }
+                });
+            });
+
+            function updateGraph() {
+                svg.selectAll("*").remove();
+                d3.json(jsonPath, function (error, data) {
+                    if (error) throw error;
+
+                    let root = d3.hierarchy(classes(data))
+                        .sum(function (d) { return d.count; })
+                        .sort(function (a, b) { return b.count - a.count; });
+
+                    bubble(root);
+                    let node = svg.selectAll(".node")
+                        .data(root.children)
+                        .enter().append("g")
+                        .attr("class", "node")
+                        .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+                    node.append("title")
+                        .text(function (d) { return d.data.keyword + ": " + format(d.data.count); });
+
+                    node.append("circle")
+                        .attr("r", function (d) { return d.r; })
+                        .style("fill", function (d) {
+                            return color(d.data.keyword);
+                        });
+
+                    node.append("text")
+                        .attr("dy", ".3em")
+                        .style("text-anchor", "middle")
+                        .text(function (d) { return d.data.keyword; });
+                });
+            }
+
+            function updateTweetsJson() {
+                $.ajax({
+                    url: '@Url.Action("GetTweets")',
+                    type: 'POST',
+                    success: function () {
+                        updateGraph();
+                    },
+                    error: function () {
+                        alert('error updating tweets json');
+                    }
+                });
+            }
+
+            $('#stopStream').click(function () {
+                location.href = '@Url.Action("Stop", "Home")';
+            });
+        });
+
+
+    </script>
+
+</body>
+
+</html>

@@ -21,6 +21,11 @@ namespace cpsc571.Controllers
             return View();
         }
 
+        public ActionResult Query()
+        {
+            return View();
+        }
+
         public void GetTweets()
         {
             MongoClient mongoClient = new MongoClient("mongodb://localhost");
@@ -37,9 +42,9 @@ namespace cpsc571.Controllers
         //}
 
         [HttpPost]
-        public void SubmitForm(FormCollection form)
+        public void SubmitForm(string query)
         {
-            TwitterStream stream = new TwitterStream(form.Get("InputQuery"));
+            TwitterStream stream = new TwitterStream(query);
             stream.SetupStream();
             ThreadStart job = new ThreadStart(stream.StartStream);
             Thread thread = new Thread(job);
