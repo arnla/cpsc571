@@ -26,12 +26,12 @@ namespace cpsc571.Controllers
             return View();
         }
 
-        public void GetTweets()
+        public void GetTweets(int threshold)
         {
             MongoClient mongoClient = new MongoClient("mongodb://localhost");
             IMongoDatabase _db = mongoClient.GetDatabase("cpsc571");
             IMongoCollection<Models.Tweet> collection = _db.GetCollection<Models.Tweet>("tweets");
-            string jsonTweets = new JavaScriptSerializer().Serialize(collection.Find(_ => true).ToList());
+            string jsonTweets = new JavaScriptSerializer().Serialize(collection.Find(t => t.Count >= threshold).ToList());
             string path = Server.MapPath("~/Data_Files/");
             System.IO.File.WriteAllText(path + "tweets.json", jsonTweets);
         }
@@ -42,7 +42,7 @@ namespace cpsc571.Controllers
         //}
 
         [HttpPost]
-        public void SubmitForm(string query)
+        public void SubmitForm(string query, int threshold)
         {
             TwitterStream stream = new TwitterStream(query);
             stream.SetupStream();

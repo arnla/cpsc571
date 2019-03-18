@@ -50,7 +50,8 @@
                     <!-- Topbar Search -->
                     <form id="queryForm" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
                         <div class="input-group">
-                            <input id="InputQuery" type="text" class="form-control bg-light border-0 small" placeholder="Enter a word or query you wish to find words related to..." aria-label="Search" aria-describedby="basic-addon2">
+                            <input id="InputQuery" type="text" class="form-control bg-light" placeholder="Word or phrase" aria-label="Search" aria-describedby="basic-addon2">
+                            <input id="ThresholdValue" type="number" min="1" class="form-control bg-light" placeholder="Threshold value" aria-label="Search" aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-primary" type="submit">
                                     <i class="fas fa-search fa-sm"></i>
@@ -124,17 +125,23 @@
         d3.select(self.frameElement).style("height", diameter + "px");
 
         $(document).ready(function () {
+            let word = '';
+            let threshold = -1;
+
             $('#queryForm').submit(function (e) {
                 e.preventDefault();
-                if ($('#InputQuery').val() === '') {
-                    alert("Query must not be empty!");
+                if ($('#InputQuery').val() === '' || $('#ThresholdValue').val() === '') {
+                    alert("Query word and threshold must both have a value!");
                     return false;
                 }
+
+                word = $('#InputQuery').val();
+                threshold = $('#ThresholdValue').val();
 
                 $.ajax({
                     url: '@Url.Action("SubmitForm")',
                     type: 'POST',
-                    data: { query: $('#InputQuery').val() },
+                    data: { query: word, threshold: threshold },
                     success: function () {
                         setInterval(function () {
                             updateTweetsJson()
@@ -182,6 +189,7 @@
                 $.ajax({
                     url: '@Url.Action("GetTweets")',
                     type: 'POST',
+                    data: { threshold: threshold },
                     success: function () {
                         updateGraph();
                     },
