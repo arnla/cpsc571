@@ -88,34 +88,23 @@ namespace cpsc571.Helpers
             List<String> tweetWords = tweetParser.ParseTweet(tweetText);
             foreach (String word in tweetWords)
             {
-                //using (var context = new TwitterDbContext())
-                //{
-                //    Models.Tweet dbTweet = context.Tweets.SingleOrDefault(t => t.Keyword == word);
-                //    if(dbTweet == null)
-                //    {
-                //        dbTweet = new Models.Tweet();
-                //        dbTweet.Keyword = word;
-                //        dbTweet.Count = 1;
-                //        context.Tweets.Add(dbTweet);
-                //    } else
-                //    {
-                //        dbTweet.Count += 1;
-                //    }
-                //    context.SaveChanges();
-                //}
 
-                var dbTweet = collection.Find(t => t.Keyword == word).ToList();
+                var lowerWord = word.ToLower();
+                if (lowerWord == this.query.ToLower())
+                    continue;
+
+                var dbTweet = collection.Find(t => t.Keyword == lowerWord).ToList();
                 if (dbTweet.Count < 1)
                 {
                     Models.Tweet newTweet = new Models.Tweet();
-                    newTweet.Keyword = word;
+                    newTweet.Keyword = lowerWord;
                     newTweet.Count = 1;
                     collection.InsertOne(newTweet);
                     ctr++;
                 }
                 else
                 {
-                    var filter = Builders<Models.Tweet>.Filter.Eq(t => t.Keyword, word);
+                    var filter = Builders<Models.Tweet>.Filter.Eq(t => t.Keyword, lowerWord);
                     var update = Builders<Models.Tweet>.Update.Inc(t => t.Count, 1);
                     collection.FindOneAndUpdate(filter, update);
                 }
