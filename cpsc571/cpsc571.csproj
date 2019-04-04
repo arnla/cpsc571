@@ -2125,6 +2125,7 @@
     <Compile Include="Helpers\TwitterStream.cs" />
     <Compile Include="Helpers\Parser\TweetParser.cs" />
     <Compile Include="Models\Tweet.cs" />
+    <Compile Include="Models\TweetCount.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
