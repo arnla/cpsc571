@@ -22,7 +22,7 @@ namespace cpsc571.Helpers
         private String TOK_MODEL_PATH = Path.Combine(HttpRuntime.BinDirectory, @"Helpers\Parser\Models\EnglishTok.nbin");
         private String TAG_DICT_PATH = Path.Combine(HttpRuntime.BinDirectory, @"Helpers\Parser\Models\Parser\tagdict");
         // Removed "VBN", "VBP", "VBZ"
-        private String[] ALLOWED_TAGS = { "CD", "JJ", "JJR", "JJS", "MD", "NN", "NNS", "NNP", "NNPS", "RB", "RBR", "RBS", "UH", "VB", "VBD", "VBG"};
+        private String[] ALLOWED_TAGS = { "CD", "JJ", "JJR", "JJS", "MD", "NN", "NNS", "NNP", "NNPS", "UH", "VB", "VBD", "VBG" };
         private String pattern = @"[^0-9a-zA-Z\s']+";
 
         public List<String> ParseTweet(String tweetText)
@@ -34,11 +34,13 @@ namespace cpsc571.Helpers
             string[] tokens = tokenizer.Tokenize(tweetText);
             var posTagger = new EnglishMaximumEntropyPosTagger(POS_MODEL_PATH, TAG_DICT_PATH);
             string[] wordTags = posTagger.Tag(tokens);
-            for(int i=0; i<tokens.Length; i++)
+            for (int i = 0; i < tokens.Length; i++)
             {
                 if (tokens[i].StartsWith("@"))
                     continue;
                 else if (Uri.IsWellFormedUriString(tokens[i], UriKind.Absolute))
+                    continue;
+                else if (tokens[i].Length <= 1 && !int.TryParse(tokens[i], out int n))
                     continue;
                 else
                 {
