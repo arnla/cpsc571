@@ -17,6 +17,7 @@ namespace cpsc571.Helpers
         private static string _consumerSecret = "";
         private static string _accessToken = "";
         private static string _accessTokenSecret = "";
+        private int COUNTERKEY = 2120151928;
         private static List<Tweetinvi.Models.ITweet> tweetsList = new List<Tweetinvi.Models.ITweet>();
         private static Tweetinvi.Streaming.IFilteredStream stream;
         private static Helpers.TweetParser tweetParser;
@@ -24,11 +25,14 @@ namespace cpsc571.Helpers
         private static MongoClient mongoClient;
         private static IMongoDatabase _db;
         private IMongoCollection<Models.Tweet> collection;
+        private IMongoCollection<Models.TweetCount> tweetCounterCollection;
         private int ctr = 1;
+        private int tweetsRetrieved;
 
         public TwitterStream(String query)
         {
             this.query = query;
+            tweetsRetrieved = 0;
         }
 
         public void SetupStream()
@@ -48,6 +52,11 @@ namespace cpsc571.Helpers
                 var matchedOn = args.MatchOn;
                 Debug.WriteLine(args.Tweet);
             };
+
+            Models.TweetCount counter = new Models.TweetCount();
+            counter.Key = COUNTERKEY;
+            counter.Count = 0;
+            tweetCounterCollection.InsertOne(counter);
         }
 
         public void StartStream()
@@ -64,12 +73,15 @@ namespace cpsc571.Helpers
             stream.StopStream();
         }
 
+        
+
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
             List<Tweetinvi.Models.ITweet> listToDb = new List<Tweetinvi.Models.ITweet>(tweetsList);
             tweetsList.Clear();
             foreach(Tweetinvi.Models.ITweet t in listToDb)
             {
+                tweetsRetrieved++;
                 Models.Tweet tweet = new Models.Tweet();
                 String textToParse;
                 if(t.IsRetweet)
@@ -81,6 +93,18 @@ namespace cpsc571.Helpers
                 }
                 CountTweetWords(textToParse);
             }
+
+            UpdateCount();
+            
+
+
+        }
+
+        private void UpdateCount()
+        {
+            var filter = Builders<Models.TweetCount>.Filter.Eq(c => c.Key, COUNTERKEY);
+            var update = Builders<Models.TweetCount>.Update.Set(c => c.Count, tweetsRetrieved);
+            tweetCounterCollection.FindOneAndUpdate(filter, update);
         }
 
         private void CountTweetWords(string tweetText)
@@ -88,34 +112,23 @@ namespace cpsc571.Helpers
             List<String> tweetWords = tweetParser.ParseTweet(tweetText);
             foreach (String word in tweetWords)
             {
-                //using (var context = new TwitterDbContext())
-                //{
-                //    Models.Tweet dbTweet = context.Tweets.SingleOrDefault(t => t.Keyword == word);
-                //    if(dbTweet == null)
-                //    {
-                //        dbTweet = new Models.Tweet();
-                //        dbTweet.Keyword = word;
-                //        dbTweet.Count = 1;
-                //        context.Tweets.Add(dbTweet);
-                //    } else
-                //    {
-                //        dbTweet.Count += 1;
-                //    }
-                //    context.SaveChanges();
-                //}
 
-                var dbTweet = collection.Find(t => t.Keyword == word).ToList();
+                var lowerWord = word.ToLower();
+                if (lowerWord == this.query.ToLower())
+                    continue;
+
+                var dbTweet = collection.Find(t => t.Keyword == lowerWord).ToList();
                 if (dbTweet.Count < 1)
                 {
                     Models.Tweet newTweet = new Models.Tweet();
-                    newTweet.Keyword = word;
+                    newTweet.Keyword = lowerWord;
                     newTweet.Count = 1;
                     collection.InsertOne(newTweet);
                     ctr++;
                 }
                 else
                 {
-                    var filter = Builders<Models.Tweet>.Filter.Eq(t => t.Keyword, word);
+                    var filter = Builders<Models.Tweet>.Filter.Eq(t => t.Keyword, lowerWord);
                     var update = Builders<Models.Tweet>.Update.Inc(t => t.Count, 1);
                     collection.FindOneAndUpdate(filter, update);
                 }
@@ -131,6 +144,8 @@ namespace cpsc571.Helpers
             mongoClient = new MongoClient("mongodb://localhost");
             _db = mongoClient.GetDatabase("cpsc571");
             collection = _db.GetCollection<Models.Tweet>("tweets");
+            tweetCounterCollection = _db.GetCollection<Models.TweetCount>("tweetcount");
+
 
             //Models.Tweet newTweet = new Models.Tweet();
             //newTweet.tweet = "pls work";

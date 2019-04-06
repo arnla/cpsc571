@@ -15,7 +15,11 @@ namespace cpsc571.Controllers
 {
     public class HomeController : Controller
     {
+        private int COUNTERKEY = 2120151928;
+        private static MongoClient mongoClient = new MongoClient("mongodb://localhost");
+        private static IMongoDatabase _db = mongoClient.GetDatabase("cpsc571");
         // GET: Home
+
         public ActionResult Index()
         {
             return View();
@@ -28,12 +32,17 @@ namespace cpsc571.Controllers
 
         public void GetTweets(int threshold)
         {
-            MongoClient mongoClient = new MongoClient("mongodb://localhost");
-            IMongoDatabase _db = mongoClient.GetDatabase("cpsc571");
             IMongoCollection<Models.Tweet> collection = _db.GetCollection<Models.Tweet>("tweets");
             string jsonTweets = new JavaScriptSerializer().Serialize(collection.Find(t => t.Count >= threshold).ToList());
             string path = Server.MapPath("~/Data_Files/");
             System.IO.File.WriteAllText(path + "tweets.json", jsonTweets);
+        }
+
+        public JsonResult GetTweetCount()
+        {
+            IMongoCollection<Models.TweetCount> counterCollection = _db.GetCollection<Models.TweetCount>("tweetcount");
+            Models.TweetCount counter = counterCollection.Find(t => t.Key.Equals(COUNTERKEY)).First();
+            return Json(counter.Count);
         }
 
         //public void Stop()

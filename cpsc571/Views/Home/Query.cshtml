@@ -59,6 +59,7 @@
                             </div>
                         </div>
                     </form>
+                    <span id="counter">0</span><span>&nbsp;Tweets Retrieved</span>
                 </nav>
                 <!-- End of Topbar -->
                 <!-- Begin Page Content -->
@@ -99,19 +100,42 @@
     <script type="text/javascript">
 
         let jsonPath = "@Request.Url.Scheme" + "://" + "@Request.Url.Authority" +
-        "@Request.ApplicationPath.TrimEnd('/')" + "/" + "Data_Files/tweets.json";
+            "@Request.ApplicationPath.TrimEnd('/')" + "/" + "Data_Files/tweets.json";
 
-        let diameter = 960,
-            format = d3.format(",d"),
-            color = d3.scaleOrdinal(d3.schemeCategory20c);
+
+        function getWidth() {
+            return Math.max(
+                document.body.scrollWidth,
+                document.documentElement.scrollWidth,
+                document.body.offsetWidth,
+                document.documentElement.offsetWidth,
+                document.documentElement.clientWidth
+            );
+        }
+
+        function getHeight() {
+            return Math.max(
+                document.body.scrollHeight,
+                document.documentElement.scrollHeight,
+                document.body.offsetHeight,
+                document.documentElement.offsetHeight,
+                document.documentElement.clientHeight
+            );
+        }
+
+        let format = d3.format(",d"),
+            color = d3.scaleOrdinal(d3.schemeCategory20c),
+            width = getWidth(),
+            height = getHeight();
+            
 
         let bubble = d3.pack()
-            .size([diameter, diameter])
+            .size([width, height])
             .padding(1.5);
 
         let svg = d3.select("#chart").append("svg")
-            .attr("width", diameter)
-            .attr("height", diameter)
+            .attr("width", width)
+            .attr("height", height)
             .attr("class", "bubble");
 
         function classes(root) {
@@ -122,7 +146,7 @@
             return { children: dataset }
         }
 
-        d3.select(self.frameElement).style("height", diameter + "px");
+        d3.select(self.frameElement).style("height", height + "px");
 
         $(document).ready(function () {
             let word = '';
@@ -144,7 +168,9 @@
                     data: { query: word, threshold: threshold },
                     success: function () {
                         setInterval(function () {
-                            updateTweetsJson()
+                            updateTweetsJson(),
+                            updateTweetCounter()
+
                         }, 10000)
                     },
                     error: function () {
@@ -185,6 +211,7 @@
                 });
             }
 
+
             function updateTweetsJson() {
                 $.ajax({
                     url: '@Url.Action("GetTweets")',
@@ -195,6 +222,21 @@
                     },
                     error: function () {
                         alert('error updating tweets json');
+                    }
+                });
+            }
+
+
+            function updateTweetCounter() {
+                $.ajax({
+                    url: '@Url.Action("GetTweetCount")',
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function (count) {
+                        document.getElementById("counter").innerHTML = count;
+                    },
+                    error: function () {
+                        alert('error updating tweet count');
                     }
                 });
             }
