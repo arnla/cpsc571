@@ -72,12 +72,11 @@ namespace cpsc571.Helpers
         {
             stream.StopStream();
         }
-
         
-
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
             List<Tweetinvi.Models.ITweet> listToDb = new List<Tweetinvi.Models.ITweet>(tweetsList);
+            UpdateCount();
             tweetsList.Clear();
             foreach(Tweetinvi.Models.ITweet t in listToDb)
             {
@@ -93,11 +92,6 @@ namespace cpsc571.Helpers
                 }
                 CountTweetWords(textToParse);
             }
-
-            UpdateCount();
-            
-
-
         }
 
         private void UpdateCount()
@@ -137,20 +131,11 @@ namespace cpsc571.Helpers
 
         private void SetupDb()
         {
-            //mongoClient = new MongoClient("mongodb+srv://user:test@school-hjytx.mongodb.net/test?retryWrites=true");
-            //_db = mongoClient.GetDatabase("cpsc571");
-            //collection = _db.GetCollection<Models.Tweet>("tweets");
-
             mongoClient = new MongoClient("mongodb://localhost");
+            mongoClient.DropDatabase("cpsc571");
             _db = mongoClient.GetDatabase("cpsc571");
             collection = _db.GetCollection<Models.Tweet>("tweets");
             tweetCounterCollection = _db.GetCollection<Models.TweetCount>("tweetcount");
-
-
-            //Models.Tweet newTweet = new Models.Tweet();
-            //newTweet.tweet = "pls work";
-            //newTweet.count = 6;
-            //collection.InsertOne(newTweet);
         }
     }
 }

@@ -13,6 +13,35 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
+    <style>
+        #loader {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          z-index: 1;
+          width: 150px;
+          height: 150px;
+          margin: -75px 0 0 -75px;
+          border: 16px solid #f3f3f3;
+          border-radius: 50%;
+          border-top: 16px solid #3498db;
+          width: 120px;
+          height: 120px;
+          -webkit-animation: spin 2s linear infinite;
+          animation: spin 2s linear infinite;
+        }
+
+        @@-webkit-keyframes spin {
+          0% { -webkit-transform: rotate(0deg); }
+          100% { -webkit-transform: rotate(360deg); }
+        }
+
+        @@keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+    </style>
+
     <title>CPSC571</title>
 
     <!-- Custom fonts for this template-->
@@ -59,13 +88,14 @@
                             </div>
                         </div>
                     </form>
-                    <span id="counter">0</span><span>&nbsp;Tweets Retrieved</span>
+                    <span id="counter">0</span><span style="padding-right: 10px;">&nbsp;Tweets Retrieved</span>
+                    <button class="btn btn-danger" id="stopBtn">Stop</button>
                 </nav>
                 <!-- End of Topbar -->
                 <!-- Begin Page Content -->
                 <div class="container-fluid" style="text-align: center;">
-                    <div id="chart">
-                    </div>
+                    <div id="loader" style="display: none;"></div>
+                    <div id="chart" style="display: none;"></div>
                 </div>
 
             </div>
@@ -152,12 +182,28 @@
             let word = '';
             let threshold = -1;
 
+            $('#stopBtn').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '@Url.Action("Restart")',
+                    type: 'POST',
+                    success: function () {
+                        window.location.href = '@Url.Action("Query")';
+                    },
+                    error: function () {
+                        alert('error');
+                    }
+                });
+            })
+
             $('#queryForm').submit(function (e) {
                 e.preventDefault();
                 if ($('#InputQuery').val() === '' || $('#ThresholdValue').val() === '') {
                     alert("Query word and threshold must both have a value!");
                     return false;
                 }
+
+                $('#loader').show();
 
                 word = $('#InputQuery').val();
                 threshold = $('#ThresholdValue').val();
@@ -183,6 +229,11 @@
                 svg.selectAll("*").remove();
                 d3.json(jsonPath, function (error, data) {
                     if (error) throw error;
+
+                    if (data.length !== 0) {
+                        $('#loader').hide();
+                        $('#chart').show();
+                    }
 
                     let root = d3.hierarchy(classes(data))
                         .sum(function (d) { return d.count; })

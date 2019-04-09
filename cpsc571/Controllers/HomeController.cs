@@ -50,6 +50,12 @@ namespace cpsc571.Controllers
         //    stream.StopStream();
         //}
 
+        public JsonResult Restart()
+        {
+            System.Web.HttpRuntime.UnloadAppDomain();
+            return Json(true);
+        }
+
         [HttpPost]
         public void SubmitForm(string query, int threshold)
         {
